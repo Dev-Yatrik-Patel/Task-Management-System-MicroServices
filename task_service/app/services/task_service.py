@@ -3,6 +3,7 @@ from fastapi import HTTPException, status
 
 from app.models.task import Task
 
+VALID_STATUSES = {"pending", "completed"}
 
 def create_task(db: Session, current_user: dict, title: str, description: str | None):
     
@@ -59,6 +60,8 @@ def update_task(
     if title is not None:
         task.title = title
     if description is not None:
+        if description not in VALID_STATUSES:
+            raise ValueError("Invalid task status")
         task.description = description
     if status_value is not None:
         task.status = status_value
