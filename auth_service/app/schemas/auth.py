@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
+from datetime import datetime
 
 class RegisterRequest(BaseModel):
     email: EmailStr
@@ -16,8 +17,10 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 class TokenValidationResponse(BaseModel):
-    id: int
+    auth_user_id: int
     email: EmailStr
+    is_active: bool = True
+    created_at: datetime 
     
     model_config = ConfigDict(from_attributes= True)
     

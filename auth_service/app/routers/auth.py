@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -38,6 +39,9 @@ async def login(payload: LoginRequest, db: Session = Depends(get_db)):
 @router.post("/validate-token")
 async def validate(payload: TokenValidationRequest):
     validated_payload = validate_token(payload.token)
-    tokenvalidate_response = TokenValidationResponse(id= int(validated_payload["sub"]),email= validated_payload["email"])
+    tokenvalidate_response = TokenValidationResponse(auth_user_id= int(validated_payload["sub"])
+                                                     ,email= validated_payload["email"]
+                                                     ,is_active= bool(validated_payload["is_active"])
+                                                     ,created_at= datetime.fromisoformat(validated_payload["created_at"]) )
     data = TokenValidationResponse.model_validate(tokenvalidate_response).model_dump(mode="json")
     return success_response(data = data, status_code = status.HTTP_200_OK, message = "User validated successfully.")

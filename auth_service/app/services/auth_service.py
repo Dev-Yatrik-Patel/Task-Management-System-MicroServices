@@ -36,7 +36,7 @@ def authenticate_user(db: Session, email: str, password: str) -> str:
         )
 
     token = create_access_token(
-        data={"sub": str(user.id), "email": user.email}
+        data={"sub": str(user.id), "email": user.email, "is_active" : str(user.is_active), "created_at": str(user.created_at)}
     )
     return token
 
