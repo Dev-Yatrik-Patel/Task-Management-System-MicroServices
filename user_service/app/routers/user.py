@@ -27,7 +27,8 @@ async def create_profile(
     db: Session = Depends(get_db),
 ):
     created_profile = create_user_profile(db = db, current_user = current_user, profile_name = userprofile_request_payload.full_name)
-    return success_response( data = UserProfileResponse.model_validate(created_profile).model_dump(mode="json"), message = "Profile created successfully.", status_code = status.HTTP_201_CREATED)
+    return success_response( data = UserProfileResponse.model_validate(created_profile).model_dump(mode="json")
+                            , message = "Profile created successfully.", status_code = status.HTTP_201_CREATED)
 
 
 @router.put("/updateprofile")
@@ -37,7 +38,8 @@ async def update_profile(
     db: Session = Depends(get_db),
 ):
     updated_profile = update_user_profile(db = db, current_user = current_user, profile_name = userprofile_update_payload.full_name)
-    return success_response( data = UserProfileResponse.model_validate(updated_profile).model_dump(mode="json"), message = "Profile updated successfully.", status_code = status.HTTP_201_CREATED)
+    return success_response( data = UserProfileResponse.model_validate(updated_profile).model_dump(mode="json")
+                            , message = "Profile updated successfully.", status_code = status.HTTP_200_OK)
 
 @router.delete("/deleteprofile")
 async def delete_profile(

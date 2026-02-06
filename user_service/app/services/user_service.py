@@ -28,7 +28,7 @@ def create_user_profile(db: Session, current_user: dict, profile_name: str) -> U
     
     if existing_profile:
         raise HTTPException(
-            status_code=status.HTTP_208_ALREADY_REPORTED,
+            status_code=status.HTTP_409_CONFLICT,
             detail="Profile is already been created."
         )
     
