@@ -35,4 +35,4 @@ async def get_current_user(authorization: HTTPAuthorizationCredentials = Depends
             detail="Invalid token"
         )
 
-    return response.json()
+    return response.json()["data"]
