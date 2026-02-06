@@ -7,4 +7,3 @@ python-dotenv
 pydantic-settings
 httpx
 dotenv
-pydantic[email]

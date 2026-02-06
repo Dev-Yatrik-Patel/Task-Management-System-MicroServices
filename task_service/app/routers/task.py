@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
 from app.dependencies.db import get_db
@@ -59,18 +59,23 @@ async def task_update(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    updated_task = update_task(
-        db = db,
-        task_id = task_id,
-        current_user = current_user,
-        title = payload.title,
-        description = payload.description,
-        status_value = payload.status,
-    )
     
-    return success_response(data = TaskResponse.model_validate(updated_task).model_dump(mode="json")
+    try:
+        updated_task = update_task( db = db,
+                                    task_id = task_id,
+                                    current_user = current_user,
+                                    title = payload.title,
+                                    description = payload.description,
+                                    status_value = payload.status,
+                                )
+        return success_response(data = TaskResponse.model_validate(updated_task).model_dump(mode="json")
                             , message = "Task updated successfully."
                             , status_code = status.HTTP_200_OK)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
 
 
 @router.delete("/{task_id}")
