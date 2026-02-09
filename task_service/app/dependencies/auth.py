@@ -1,8 +1,11 @@
+import json
 import httpx
 from fastapi import Header, HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from app.core.config import settings
+from app.core.redis import redis_client
+from redis.exceptions import ConnectionError
 
 security = HTTPBearer()
 
@@ -16,6 +19,19 @@ async def get_current_user(authorization: HTTPAuthorizationCredentials = Depends
             detail="Invalid authorization header"
         )
 
+    # try redis first
+    redis_key = f"auth:token:{token}"
+    
+    try: 
+        cached_user = await redis_client.get(redis_key)
+    except (ConnectionError, ConnectionRefusedError):
+        # Fallback to the Auth Service if Redis is down
+        cached_user = None
+    
+    if cached_user:
+        return json.loads(cached_user)
+
+    # fallback auth service call
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(
@@ -35,4 +51,11 @@ async def get_current_user(authorization: HTTPAuthorizationCredentials = Depends
             detail="Invalid token"
         )
 
-    return response.json()["data"]
+    user_data = response.json()["data"]
+    
+    # cached user data 
+    expires_in = response.json().get("expires_in", 900)
+    
+    await redis_client.set(redis_key, json.dumps(user_data), ex=expires_in)
+    
+    return user_data
