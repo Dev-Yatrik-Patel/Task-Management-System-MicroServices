@@ -19,7 +19,7 @@ from app.services.task_service import (
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 
-@router.post("", response_model=TaskResponse)
+@router.post("")
 async def task_create(
     payload: TaskCreateRequest,
     current_user: dict = Depends(get_current_user),
@@ -38,7 +38,7 @@ async def task_create(
                             , status_code = status.HTTP_201_CREATED)
 
 
-@router.get("", response_model=list[TaskResponse])
+@router.get("")
 async def list_tasks(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -52,7 +52,7 @@ async def list_tasks(
                             , status_code = status.HTTP_200_OK)
 
 
-@router.put("/{task_id}", response_model=TaskResponse)
+@router.put("/{task_id}")
 async def task_update(
     task_id: int,
     payload: TaskUpdateRequest,
@@ -86,4 +86,4 @@ async def task_delete(
 ):
     delete_task(db = db, task_id = task_id, current_user = current_user)
     
-    return success_response(message = "Task updated successfully.", status_code = status.HTTP_200_OK)
+    return success_response(message = "Task deleted successfully.", status_code = status.HTTP_200_OK)

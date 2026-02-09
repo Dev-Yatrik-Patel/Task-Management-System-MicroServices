@@ -60,10 +60,10 @@ def update_task(
     if title is not None:
         task.title = title
     if description is not None:
-        if description not in VALID_STATUSES:
-            raise ValueError("Invalid task status")
         task.description = description
     if status_value is not None:
+        if status_value not in VALID_STATUSES:
+            raise ValueError("Invalid task status")
         task.status = status_value
 
     db.commit()
