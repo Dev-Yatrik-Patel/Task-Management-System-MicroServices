@@ -9,15 +9,9 @@ from app.schemas.task import (
     TaskUpdateRequest,
     TaskResponse,
 )
-from app.services.task_service import (
-    create_task,
-    get_tasks,
-    update_task,
-    delete_task,
-)
+from app.services.task_service import TaskService
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
-
 
 @router.post("")
 async def task_create(
@@ -25,13 +19,8 @@ async def task_create(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    
-    created_task = create_task(
-        db = db,
-        current_user = current_user,
-        title = payload.title,
-        description = payload.description,
-    )
+    service = TaskService(db,current_user)
+    created_task = service.create_task(title = payload.title, description = payload.description)
     
     return success_response(data = TaskResponse.model_validate(created_task).model_dump(mode="json")
                             , message = "Task created successfully."
@@ -43,7 +32,8 @@ async def list_tasks(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    user_tasks = get_tasks(db = db, current_user = current_user)
+    service = TaskService(db,current_user)
+    user_tasks = service.get_tasks()
     
     data = [TaskResponse.model_validate(i).model_dump(mode="json")  for i in user_tasks]
     
@@ -59,15 +49,9 @@ async def task_update(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    
+    service = TaskService(db,current_user)
     try:
-        updated_task = update_task( db = db,
-                                    task_id = task_id,
-                                    current_user = current_user,
-                                    title = payload.title,
-                                    description = payload.description,
-                                    status_value = payload.status,
-                                )
+        updated_task = service.update_task(task_id = task_id, title = payload.title, description = payload.description, status_value = payload.status)
         return success_response(data = TaskResponse.model_validate(updated_task).model_dump(mode="json")
                             , message = "Task updated successfully."
                             , status_code = status.HTTP_200_OK)
@@ -84,6 +68,7 @@ async def task_delete(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    delete_task(db = db, task_id = task_id, current_user = current_user)
+    service = TaskService(db,current_user)
+    service.delete_task(task_id = task_id)
     
     return success_response(message = "Task deleted successfully.", status_code = status.HTTP_200_OK)
